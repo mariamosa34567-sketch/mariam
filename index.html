@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Science Lab</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: linear-gradient(135deg, #eef7ff, #f8f3ff);
+            color: #1f2937;
+        }
+
+        .container {
+            width: min(1000px, 92%);
+            margin: 30px auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            margin-bottom: 8px;
+            color: #173b63;
+        }
+
+        .header p {
+            color: #5b6470;
+            margin-top: 0;
+        }
+
+        .lab-card {
+            background: white;
+            border-radius: 22px;
+            padding: 28px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            margin-bottom: 22px;
+        }
+
+        .section-title {
+            color: #173b63;
+            margin-top: 0;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin-top: 20px;
+        }
+
+        button {
+            border: none;
+            border-radius: 14px;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        .material-btn {
+            background: #edf4ff;
+            color: #173b63;
+            border: 2px solid #d7e7ff;
+        }
+
+        .material-btn:hover {
+            background: #dcecff;
+        }
+
+        .experiment-area {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            align-items: center;
+            margin-top: 25px;
+        }
+
+        .beaker-area {
+            text-align: center;
+        }
+
+        .beaker {
+            width: 180px;
+            height: 220px;
+            border: 6px solid #334155;
+            border-top: none;
+            border-radius: 0 0 30px 30px;
+            margin: auto;
+            position: relative;
+            overflow: hidden;
+            background: rgba(255,255,255,0.55);
+        }
+
+        .liquid {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 55%;
+            transition: background-color 0.5s, height 0.5s;
+            background: #89c2ff;
+        }
+
+        .bubble {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.75);
+            position: absolute;
+            bottom: 20%;
+            animation: bubbleMove 2s infinite ease-in;
+        }
+
+        .bubble1 {
+            left: 25%;
+        }
+
+        .bubble2 {
+            left: 50%;
+            animation-delay: 0.5s;
+        }
+
+        .bubble3 {
+            left: 70%;
+            animation-delay: 1s;
+        }
+
+        @keyframes bubbleMove {
+            0% {
+                transform: translateY(0);
+                opacity: 0.2;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(-100px);
+                opacity: 0;
+            }
+        }
+
+        .results {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .result-box {
+            margin-bottom: 14px;
+        }
+
+        .result-label {
+            font-weight: bold;
+            color: #475569;
+        }
+
+        .result-value {
+            margin-top: 5px;
+            font-size: 18px;
+            color: #172554;
+        }
+
+        .question {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 15px;
+        }
+
+        .question h3 {
+            margin-top: 0;
+        }
+
+        .answers {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .answer-btn {
+            background: white;
+            border: 2px solid #dbe4ee;
+        }
+
+        .answer-btn:hover {
+            background: #f1f5f9;
+        }
+
+        .feedback {
+            margin-top: 15px;
+            font-weight: bold;
+            min-height: 24px;
+        }
+
+        .score {
+            font-size: 22px;
+            font-weight: bold;
+            color: #173b63;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .reset-btn {
+            display: block;
+            margin: 20px auto 0;
+            background: #173b63;
+            color: white;
+            padding: 13px 28px;
+        }
+
+        .reset-btn:hover {
+            background: #0f2947;
+        }
+
+        .ph-scale {
+            margin-top: 20px;
+        }
+
+        .scale {
+            height: 24px;
+            border-radius: 20px;
+            background: linear-gradient(
+                to right,
+                #ef4444,
+                #f97316,
+                #facc15,
+                #22c55e,
+                #06b6d4,
+                #3b82f6,
+                #7c3aed
+            );
+        }
+
+        .scale-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            margin-top: 7px;
+            color: #64748b;
+        }
+
+        @media (max-width: 750px) {
+            .controls,
+            .answers {
+                grid-template-columns: 1fr;
+            }
+
+            .experiment-area {
+                grid-template-columns: 1fr;
+            }
+
+            .lab-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <h1>🧪 Interactive Science Lab</h1>
+        <p>Acid–Base Investigation | Grade 6 & Grade 7</p>
+    </div>
+
+    <div class="lab-card">
+
+        <h2 class="section-title">🔬 Experiment 1: Test Different Substances</h2>
+
+        <p>
+            Choose a substance and observe whether it is acidic, neutral, or basic.
+        </p>
+
+        <div class="controls">
+
+            <button class="material-btn" onclick="testSubstance('lemon')">
+                🍋 Lemon Juice
+            </button>
+
+            <button class="material-btn" onclick="testSubstance('water')">
+                💧 Water
+            </button>
+
+            <button class="material-btn" onclick="testSubstance('soap')">
+                🧼 Soap Solution
+            </button>
+
+        </div>
+
+        <div class="experiment-area">
+
+            <div class="beaker-area">
+
+                <div class="beaker">
+                    <div id="liquid" class="liquid"></div>
+
+                    <div class="bubble bubble1"></div>
+                    <div class="bubble bubble2"></div>
+                    <div class="bubble bubble3"></div>
+                </div>
+
+                <p><strong>Virtual Beaker</strong></p>
+
+            </div>
+
+            <div class="results">
+
+                <div class="result-box">
+                    <div class="result-label">Substance:</div>
+                    <div class="result-value" id="substance">
+                        Choose a substance
+                    </div>
+                </div>
+
+                <div class="result-box">
+                    <div class="result-label">pH:</div>
+                    <div class="result-value" id="ph">
+                        -
+                    </div>
+                </div>
+
+                <div class="result-box">
+                    <div class="result-label">Type:</div>
+                    <div class="result-value" id="type">
+                        -
+                    </div>
+                </div>
+
+                <div class="result-box">
+                    <div class="result-label">Observation:</div>
+                    <div class="result-value" id="observation">
+                        Select a substance to begin the experiment.
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="ph-scale">
+
+            <p><strong>pH Scale</strong></p>
+
+            <div class="scale"></div>
+
+            <div class="scale-labels">
+                <span>Acidic</span>
+                <span>Neutral</span>
+                <span>Basic</span>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="lab-card">
+
+        <h2 class="section-title">🧠 Check Your Understanding</h2>
+
+        <div class="question">
+
+            <h3>Question 1</h3>
+
+            <p>
+                Which substance is acidic?
+            </p>
+
+            <div class="answers">
+
+                <button class="answer-btn" onclick="checkAnswer(this, false)">
+                    Water
+                </button>
+
+                <button class="answer-btn" onclick="checkAnswer(this, true)">
+                    Lemon Juice
+                </button>
+
+                <button class="answer-btn" onclick="checkAnswer(this, false)">
+                    Soap Solution
+                </button>
+
+            </div>
+
+            <div id="feedback1" class="feedback"></div>
+
+        </div>
+
+
+        <div class="question">
+
+            <h3>Question 2</h3>
+
+            <p>
+                A substance with pH 7 is:
+            </p>
+
+            <div class="answers">
+
+                <button class="answer-btn" onclick="checkAnswer2(this, false)">
+                    Acidic
+                </button>
+
+                <button class="answer-btn" onclick="checkAnswer2(this, true)">
+                    Neutral
+                </button>
+
+                <button class="answer-btn" onclick="checkAnswer2(this, false)">
+                    Basic
+                </button>
+
+            </div>
+
+            <div id="feedback2" class="feedback"></div>
+
+        </div>
+
+
+        <div class="question">
+
+            <h3>Question 3</h3>
+
+            <p>
+                A substance with pH greater than 7 is:
+            </p>
+
+            <div class="answers">
+
+                <button class="answer-btn" onclick="checkAnswer3(this, false)">
+                    Acidic
+                </button>
+
+                <button class="answer-btn" onclick="checkAnswer3(this, true)">
+                    Basic
+                </button>
+
+                <button class="answer-btn" onclick="checkAnswer3(this, false)">
+                    Neutral
+                </button>
+
+            </div>
+
+            <div id="feedback3" class="feedback"></div>
+
+        </div>
+
+        <div class="score">
+            Score: <span id="score">0</span> / 3
+        </div>
+
+        <button class="reset-btn" onclick="resetLab()">
+            🔄 Reset Lab
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+let score = 0;
+
+let answered1 = false;
+let answered2 = false;
+let answered3 = false;
+
+
+function testSubstance(substance) {
+
+    const liquid = document.getElementById("liquid");
+
+    const substanceText = document.getElementById("substance");
+    const phText = document.getElementById("ph");
+    const typeText = document.getElementById("type");
+    const observationText = document.getElementById("observation");
+
+    if (substance === "lemon") {
+
+        substanceText.textContent = "Lemon Juice";
+        phText.textContent = "pH 3";
+        typeText.textContent = "Acidic";
+        observationText.textContent =
+            "The indicator shows an acidic substance.";
+
+        liquid.style.backgroundColor = "#ef4444";
+        liquid.style.height = "60%";
+
+    }
+
+    else if (substance === "water") {
+
+        substanceText.textContent = "Water";
+        phText.textContent = "pH 7";
+        typeText.textContent = "Neutral";
+        observationText.textContent =
+            "Water is neutral because its pH is 7.";
+
+        liquid.style.backgroundColor = "#22c55e";
+        liquid.style.height = "52%";
+
+    }
+
+    else if (substance === "soap") {
+
+        substanceText.textContent = "Soap Solution";
+        phText.textContent = "pH 10";
+        typeText.textContent = "Basic";
+        observationText.textContent =
+            "The indicator shows a basic substance.";
+
+        liquid.style.backgroundColor = "#3b82f6";
+        liquid.style.height = "65%";
+
+    }
+}
+
+
+function checkAnswer(button, correct) {
+
+    if (answered1) {
+        return;
+    }
+
+    answered1 = true;
+
+    const feedback = document.getElementById("feedback1");
+
+    if (correct) {
+
+        feedback.textContent = "✅ Correct! Lemon juice is acidic.";
+        feedback.style.color = "#15803d";
+
+        score++;
+        document.getElementById("score").textContent = score;
+
+    } else {
+
+        feedback.textContent =
+            "❌ Incorrect. Lemon juice is acidic.";
+        feedback.style.color = "#b91c1c";
+
+    }
+}
+
+
+function checkAnswer2(button, correct) {
+
+    if (answered2) {
+        return;
+    }
+
+    answered2 = true;
+
+    const feedback = document.getElementById("feedback2");
+
+    if (correct) {
+
+        feedback.textContent =
+            "✅ Correct! pH 7 is neutral.";
+        feedback.style.color = "#15803d";
+
+        score++;
+        document.getElementById("score").textContent = score;
+
+    } else {
+
+        feedback.textContent =
+            "❌ Incorrect. pH 7 is neutral.";
+        feedback.style.color = "#b91c1c";
+
+    }
+}
+
+
+function checkAnswer3(button, correct) {
+
+    if (answered3) {
+        return;
+    }
+
+    answered3 = true;
+
+    const feedback = document.getElementById("feedback3");
+
+    if (correct) {
+
+        feedback.textContent =
+            "✅ Correct! A pH greater than 7 is basic.";
+        feedback.style.color = "#15803d";
+
+        score++;
+        document.getElementById("score").textContent = score;
+
+    } else {
+
+        feedback.textContent =
+            "❌ Incorrect. A pH greater than 7 is basic.";
+        feedback.style.color = "#b91c1c";
+
+    }
+}
+
+
+function resetLab() {
+
+    score = 0;
+
+    answered1 = false;
+    answered2 = false;
+    answered3 = false;
+
+    document.getElementById("score").textContent = "0";
+
+    document.getElementById("substance").textContent =
+        "Choose a substance";
+
+    document.getElementById("ph").textContent = "-";
+
+    document.getElementById("type").textContent = "-";
+
+    document.getElementById("observation").textContent =
+        "Select a substance to begin the experiment.";
+
+    document.getElementById("feedback1").textContent = "";
+    document.getElementById("feedback2").textContent = "";
+    document.getElementById("feedback3").textContent = "";
+
+    document.getElementById("liquid").style.backgroundColor =
+        "#89c2ff";
+
+    document.getElementById("liquid").style.height =
+        "55%";
+}
+
+</script>
+
+</body>
+</html>
