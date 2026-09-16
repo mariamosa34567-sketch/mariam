@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Science Lab</title>
+
+    <title>Interactive Combustion Lab</title>
 
     <style>
         * {
@@ -13,12 +14,12 @@
         body {
             margin: 0;
             font-family: Arial, Helvetica, sans-serif;
-            background: linear-gradient(135deg, #eef7ff, #f8f3ff);
+            background: linear-gradient(135deg, #fff7ed, #eff6ff);
             color: #1f2937;
         }
 
         .container {
-            width: min(1000px, 92%);
+            width: min(1050px, 94%);
             margin: 30px auto;
         }
 
@@ -29,152 +30,245 @@
 
         .header h1 {
             margin-bottom: 8px;
-            color: #173b63;
+            color: #7c2d12;
+            font-size: 34px;
         }
 
         .header p {
-            color: #5b6470;
-            margin-top: 0;
+            color: #64748b;
+            font-size: 17px;
         }
 
         .lab-card {
             background: white;
             border-radius: 22px;
             padding: 28px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
             margin-bottom: 22px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
         }
 
         .section-title {
-            color: #173b63;
             margin-top: 0;
+            color: #7c2d12;
         }
 
-        .controls {
+        .gas-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 14px;
+            gap: 15px;
             margin-top: 20px;
         }
 
-        button {
-            border: none;
-            border-radius: 14px;
-            padding: 14px;
+        .gas-button {
+            padding: 18px;
+            border-radius: 15px;
+            border: 2px solid #e2e8f0;
+            background: #f8fafc;
+            cursor: pointer;
             font-size: 16px;
             font-weight: bold;
-            cursor: pointer;
             transition: 0.2s;
         }
 
-        button:hover {
-            transform: translateY(-2px);
+        .gas-button:hover {
+            transform: translateY(-3px);
+            background: #f1f5f9;
         }
 
-        .material-btn {
-            background: #edf4ff;
-            color: #173b63;
-            border: 2px solid #d7e7ff;
+        .gas-button.selected {
+            border-color: #ea580c;
+            background: #fff7ed;
         }
 
-        .material-btn:hover {
-            background: #dcecff;
+        .gas-symbol {
+            display: block;
+            font-size: 30px;
+            margin-bottom: 8px;
         }
 
-        .experiment-area {
+        .lab-area {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 30px;
             align-items: center;
-            margin-top: 25px;
+            margin-top: 30px;
         }
 
-        .beaker-area {
+        .experiment {
             text-align: center;
         }
 
-        .beaker {
-            width: 180px;
-            height: 220px;
-            border: 6px solid #334155;
-            border-top: none;
-            border-radius: 0 0 30px 30px;
-            margin: auto;
+        .jar {
+            width: 240px;
+            height: 320px;
+            margin: 0 auto;
+            border: 6px solid #475569;
+            border-radius: 25px 25px 35px 35px;
             position: relative;
             overflow: hidden;
-            background: rgba(255,255,255,0.55);
+            background: rgba(226,232,240,0.3);
         }
 
-        .liquid {
+        .jar-label {
             position: absolute;
-            bottom: 0;
+            top: 12px;
             left: 0;
-            width: 100%;
-            height: 55%;
-            transition: background-color 0.5s, height 0.5s;
-            background: #89c2ff;
+            right: 0;
+            text-align: center;
+            font-weight: bold;
+            color: #475569;
+            z-index: 5;
         }
 
-        .bubble {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.75);
+        .oxygen-zone {
             position: absolute;
-            bottom: 20%;
-            animation: bubbleMove 2s infinite ease-in;
+            inset: 0;
+            background: rgba(59,130,246,0.08);
         }
 
-        .bubble1 {
-            left: 25%;
-        }
-
-        .bubble2 {
+        .flame {
+            position: absolute;
             left: 50%;
-            animation-delay: 0.5s;
+            bottom: 55px;
+            width: 75px;
+            height: 125px;
+            transform: translateX(-50%);
+            background: linear-gradient(
+                to top,
+                #f97316,
+                #facc15,
+                #fde68a
+            );
+            border-radius: 50% 50% 45% 45%;
+            clip-path: polygon(
+                50% 0%,
+                70% 25%,
+                60% 45%,
+                85% 68%,
+                50% 100%,
+                20% 70%,
+                35% 50%,
+                25% 28%
+            );
+            transition: 0.6s;
+            filter: drop-shadow(0 0 10px rgba(249,115,22,0.45));
         }
 
-        .bubble3 {
-            left: 70%;
-            animation-delay: 1s;
+        .flame.small {
+            width: 48px;
+            height: 80px;
+            opacity: 0.7;
         }
 
-        @keyframes bubbleMove {
-            0% {
-                transform: translateY(0);
-                opacity: 0.2;
-            }
+        .flame.strong {
+            width: 95px;
+            height: 155px;
+            opacity: 1;
+            filter: drop-shadow(0 0 18px rgba(249,115,22,0.7));
+        }
 
-            50% {
-                opacity: 1;
-            }
+        .flame.out {
+            opacity: 0;
+            transform: translateX(-50%) scale(0.2);
+        }
 
-            100% {
-                transform: translateY(-100px);
-                opacity: 0;
-            }
+        .wick {
+            position: absolute;
+            bottom: 42px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 8px;
+            height: 35px;
+            background: #374151;
+            border-radius: 5px;
+        }
+
+        .candle {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 75px;
+            height: 55px;
+            border-radius: 8px 8px 4px 4px;
+            background: #e5e7eb;
+        }
+
+        .gas-cloud {
+            position: absolute;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(148,163,184,0.15);
+            opacity: 0;
+            transition: 0.5s;
+        }
+
+        .gas-cloud.active {
+            opacity: 1;
         }
 
         .results {
             background: #f8fafc;
-            border-radius: 16px;
-            padding: 20px;
             border: 1px solid #e2e8f0;
+            border-radius: 18px;
+            padding: 22px;
         }
 
-        .result-box {
-            margin-bottom: 14px;
+        .result-row {
+            margin-bottom: 18px;
         }
 
-        .result-label {
+        .label {
             font-weight: bold;
             color: #475569;
         }
 
-        .result-value {
+        .value {
             margin-top: 5px;
-            font-size: 18px;
-            color: #172554;
+            font-size: 19px;
+        }
+
+        .add-button {
+            display: block;
+            width: 100%;
+            margin-top: 20px;
+            background: #ea580c;
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 14px;
+            font-weight: bold;
+            font-size: 17px;
+            cursor: pointer;
+        }
+
+        .add-button:hover {
+            background: #c2410c;
+        }
+
+        .restart-button {
+            display: block;
+            margin: 22px auto 0;
+            background: #334155;
+            color: white;
+            padding: 13px 25px;
+            border: none;
+            border-radius: 12px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .observation {
+            background: #fff7ed;
+            border-left: 5px solid #ea580c;
+            padding: 16px;
+            margin-top: 20px;
+            border-radius: 10px;
+            line-height: 1.6;
         }
 
         .question {
@@ -184,10 +278,6 @@
             margin-top: 15px;
         }
 
-        .question h3 {
-            margin-top: 0;
-        }
-
         .answers {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -195,13 +285,13 @@
             margin-top: 15px;
         }
 
-        .answer-btn {
+        .answer {
+            padding: 13px;
             background: white;
             border: 2px solid #dbe4ee;
-        }
-
-        .answer-btn:hover {
-            background: #f1f5f9;
+            border-radius: 12px;
+            font-weight: bold;
+            cursor: pointer;
         }
 
         .feedback {
@@ -211,64 +301,26 @@
         }
 
         .score {
-            font-size: 22px;
-            font-weight: bold;
-            color: #173b63;
             text-align: center;
-            margin-top: 10px;
-        }
-
-        .reset-btn {
-            display: block;
-            margin: 20px auto 0;
-            background: #173b63;
-            color: white;
-            padding: 13px 28px;
-        }
-
-        .reset-btn:hover {
-            background: #0f2947;
-        }
-
-        .ph-scale {
-            margin-top: 20px;
-        }
-
-        .scale {
-            height: 24px;
-            border-radius: 20px;
-            background: linear-gradient(
-                to right,
-                #ef4444,
-                #f97316,
-                #facc15,
-                #22c55e,
-                #06b6d4,
-                #3b82f6,
-                #7c3aed
-            );
-        }
-
-        .scale-labels {
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            margin-top: 7px;
-            color: #64748b;
+            margin-top: 22px;
+            font-size: 23px;
+            font-weight: bold;
+            color: #7c2d12;
         }
 
         @media (max-width: 750px) {
-            .controls,
+
+            .gas-grid,
             .answers {
                 grid-template-columns: 1fr;
             }
 
-            .experiment-area {
+            .lab-area {
                 grid-template-columns: 1fr;
             }
 
-            .lab-card {
-                padding: 20px;
+            .header h1 {
+                font-size: 27px;
             }
         }
     </style>
@@ -279,130 +331,167 @@
 <div class="container">
 
     <div class="header">
-        <h1>🧪 Interactive Science Lab</h1>
-        <p>Acid–Base Investigation | Grade 6 & Grade 7</p>
+        <h1>🔥 Interactive Combustion Lab</h1>
+        <p>Investigate the Effect of Different Gases on Combustion</p>
     </div>
+
+
+    <!-- EXPERIMENT -->
 
     <div class="lab-card">
 
-        <h2 class="section-title">🔬 Experiment 1: Test Different Substances</h2>
+        <h2 class="section-title">🧪 Virtual Experiment</h2>
 
         <p>
-            Choose a substance and observe whether it is acidic, neutral, or basic.
+            Select a gas, then click <strong>Add Gas</strong> and observe what happens to the flame.
         </p>
 
-        <div class="controls">
 
-            <button class="material-btn" onclick="testSubstance('lemon')">
-                🍋 Lemon Juice
+        <div class="gas-grid">
+
+            <button class="gas-button" onclick="selectGas('oxygen')" id="oxygenButton">
+                <span class="gas-symbol">O₂</span>
+                Oxygen
             </button>
 
-            <button class="material-btn" onclick="testSubstance('water')">
-                💧 Water
+            <button class="gas-button" onclick="selectGas('carbonDioxide')" id="co2Button">
+                <span class="gas-symbol">CO₂</span>
+                Carbon Dioxide
             </button>
 
-            <button class="material-btn" onclick="testSubstance('soap')">
-                🧼 Soap Solution
+            <button class="gas-button" onclick="selectGas('nitrogen')" id="nitrogenButton">
+                <span class="gas-symbol">N₂</span>
+                Nitrogen
             </button>
 
         </div>
 
-        <div class="experiment-area">
 
-            <div class="beaker-area">
+        <div class="lab-area">
 
-                <div class="beaker">
-                    <div id="liquid" class="liquid"></div>
+            <div class="experiment">
 
-                    <div class="bubble bubble1"></div>
-                    <div class="bubble bubble2"></div>
-                    <div class="bubble bubble3"></div>
+                <div class="jar">
+
+                    <div class="jar-label">
+                        Gas Chamber
+                    </div>
+
+                    <div class="oxygen-zone"></div>
+
+                    <div id="gasCloud" class="gas-cloud"></div>
+
+                    <div id="flame" class="flame"></div>
+
+                    <div class="wick"></div>
+
+                    <div class="candle"></div>
+
                 </div>
 
-                <p><strong>Virtual Beaker</strong></p>
+                <p><strong>Burning Candle</strong></p>
 
             </div>
+
 
             <div class="results">
 
-                <div class="result-box">
-                    <div class="result-label">Substance:</div>
-                    <div class="result-value" id="substance">
-                        Choose a substance
+                <div class="result-row">
+                    <div class="label">Selected Gas</div>
+                    <div class="value" id="selectedGas">
+                        None
                     </div>
                 </div>
 
-                <div class="result-box">
-                    <div class="result-label">pH:</div>
-                    <div class="result-value" id="ph">
-                        -
+                <div class="result-row">
+                    <div class="label">Effect on Combustion</div>
+                    <div class="value" id="effect">
+                        Choose a gas to begin.
                     </div>
                 </div>
 
-                <div class="result-box">
-                    <div class="result-label">Type:</div>
-                    <div class="result-value" id="type">
-                        -
+                <div class="result-row">
+                    <div class="label">Flame Condition</div>
+                    <div class="value" id="flameCondition">
+                        Burning normally
                     </div>
                 </div>
 
-                <div class="result-box">
-                    <div class="result-label">Observation:</div>
-                    <div class="result-value" id="observation">
-                        Select a substance to begin the experiment.
-                    </div>
-                </div>
+                <button
+                    class="add-button"
+                    onclick="addGas()"
+                >
+                    ➕ Add Gas
+                </button>
 
             </div>
 
         </div>
 
-        <div class="ph-scale">
 
-            <p><strong>pH Scale</strong></p>
-
-            <div class="scale"></div>
-
-            <div class="scale-labels">
-                <span>Acidic</span>
-                <span>Neutral</span>
-                <span>Basic</span>
-            </div>
-
+        <div
+            class="observation"
+            id="observation"
+        >
+            <strong>Observation:</strong>
+            Select a gas and add it to the chamber.
         </div>
+
+
+        <button
+            class="restart-button"
+            onclick="resetExperiment()"
+        >
+            🔄 Reset Experiment
+        </button>
 
     </div>
 
 
+
+    <!-- SCIENCE FACT -->
+
     <div class="lab-card">
 
-        <h2 class="section-title">🧠 Check Your Understanding</h2>
+        <h2 class="section-title">📘 What Did You Learn?</h2>
 
         <div class="question">
 
             <h3>Question 1</h3>
 
             <p>
-                Which substance is acidic?
+                Which gas supports combustion?
             </p>
 
             <div class="answers">
 
-                <button class="answer-btn" onclick="checkAnswer(this, false)">
-                    Water
+                <button
+                    class="answer"
+                    onclick="checkQuestion(1, false)"
+                >
+                    Nitrogen
                 </button>
 
-                <button class="answer-btn" onclick="checkAnswer(this, true)">
-                    Lemon Juice
+                <button
+                    class="answer"
+                    onclick="checkQuestion(1, true)"
+                >
+                    Oxygen
                 </button>
 
-                <button class="answer-btn" onclick="checkAnswer(this, false)">
-                    Soap Solution
+                <button
+                    class="answer"
+                    onclick="checkQuestion(1, false)"
+                >
+                    Carbon Dioxide
                 </button>
 
             </div>
 
-            <div id="feedback1" class="feedback"></div>
+            <div
+                id="feedback1"
+                class="feedback"
+            ></div>
 
         </div>
 
@@ -412,26 +501,38 @@
             <h3>Question 2</h3>
 
             <p>
-                A substance with pH 7 is:
+                What happens when carbon dioxide is added to a burning candle?
             </p>
 
             <div class="answers">
 
-                <button class="answer-btn" onclick="checkAnswer2(this, false)">
-                    Acidic
+                <button
+                    class="answer"
+                    onclick="checkQuestion(2, true)"
+                >
+                    The flame goes out
                 </button>
 
-                <button class="answer-btn" onclick="checkAnswer2(this, true)">
-                    Neutral
+                <button
+                    class="answer"
+                    onclick="checkQuestion(2, false)"
+                >
+                    The flame becomes stronger
                 </button>
 
-                <button class="answer-btn" onclick="checkAnswer2(this, false)">
-                    Basic
+                <button
+                    class="answer"
+                    onclick="checkQuestion(2, false)"
+                >
+                    The candle burns faster
                 </button>
 
             </div>
 
-            <div id="feedback2" class="feedback"></div>
+            <div
+                id="feedback2"
+                class="feedback"
+            ></div>
 
         </div>
 
@@ -441,36 +542,51 @@
             <h3>Question 3</h3>
 
             <p>
-                A substance with pH greater than 7 is:
+                Does nitrogen support combustion?
             </p>
 
             <div class="answers">
 
-                <button class="answer-btn" onclick="checkAnswer3(this, false)">
-                    Acidic
+                <button
+                    class="answer"
+                    onclick="checkQuestion(3, false)"
+                >
+                    Yes
                 </button>
 
-                <button class="answer-btn" onclick="checkAnswer3(this, true)">
-                    Basic
+                <button
+                    class="answer"
+                    onclick="checkQuestion(3, true)"
+                >
+                    No
                 </button>
 
-                <button class="answer-btn" onclick="checkAnswer3(this, false)">
-                    Neutral
+                <button
+                    class="answer"
+                    onclick="checkQuestion(3, false)"
+                >
+                    Only at low temperature
                 </button>
 
             </div>
 
-            <div id="feedback3" class="feedback"></div>
+            <div
+                id="feedback3"
+                class="feedback"
+            ></div>
 
         </div>
+
 
         <div class="score">
-            Score: <span id="score">0</span> / 3
-        </div>
 
-        <button class="reset-btn" onclick="resetLab()">
-            🔄 Reset Lab
-        </button>
+            Score:
+            <span id="score">
+                0
+            </span>
+            / 3
+
+        </div>
 
     </div>
 
@@ -479,178 +595,260 @@
 
 <script>
 
+let selectedGas = null;
+
 let score = 0;
 
-let answered1 = false;
-let answered2 = false;
-let answered3 = false;
+let answered = {
+    1: false,
+    2: false,
+    3: false
+};
 
 
-function testSubstance(substance) {
+function selectGas(gas) {
 
-    const liquid = document.getElementById("liquid");
+    selectedGas = gas;
 
-    const substanceText = document.getElementById("substance");
-    const phText = document.getElementById("ph");
-    const typeText = document.getElementById("type");
-    const observationText = document.getElementById("observation");
+    const buttons = document.querySelectorAll(".gas-button");
 
-    if (substance === "lemon") {
+    buttons.forEach(function(button) {
+        button.classList.remove("selected");
+    });
 
-        substanceText.textContent = "Lemon Juice";
-        phText.textContent = "pH 3";
-        typeText.textContent = "Acidic";
-        observationText.textContent =
-            "The indicator shows an acidic substance.";
 
-        liquid.style.backgroundColor = "#ef4444";
-        liquid.style.height = "60%";
+    if (gas === "oxygen") {
 
+        document
+            .getElementById("oxygenButton")
+            .classList.add("selected");
+
+        document
+            .getElementById("selectedGas")
+            .textContent = "Oxygen (O₂)";
     }
 
-    else if (substance === "water") {
 
-        substanceText.textContent = "Water";
-        phText.textContent = "pH 7";
-        typeText.textContent = "Neutral";
-        observationText.textContent =
-            "Water is neutral because its pH is 7.";
+    else if (gas === "carbonDioxide") {
 
-        liquid.style.backgroundColor = "#22c55e";
-        liquid.style.height = "52%";
+        document
+            .getElementById("co2Button")
+            .classList.add("selected");
 
+        document
+            .getElementById("selectedGas")
+            .textContent = "Carbon Dioxide (CO₂)";
     }
 
-    else if (substance === "soap") {
 
-        substanceText.textContent = "Soap Solution";
-        phText.textContent = "pH 10";
-        typeText.textContent = "Basic";
-        observationText.textContent =
-            "The indicator shows a basic substance.";
+    else if (gas === "nitrogen") {
 
-        liquid.style.backgroundColor = "#3b82f6";
-        liquid.style.height = "65%";
+        document
+            .getElementById("nitrogenButton")
+            .classList.add("selected");
 
+        document
+            .getElementById("selectedGas")
+            .textContent = "Nitrogen (N₂)";
     }
+
 }
 
 
-function checkAnswer(button, correct) {
+function addGas() {
 
-    if (answered1) {
+    if (selectedGas === null) {
+
+        document
+            .getElementById("observation")
+            .innerHTML =
+            "<strong>Observation:</strong> Please select a gas first.";
+
         return;
     }
 
-    answered1 = true;
 
-    const feedback = document.getElementById("feedback1");
+    const flame =
+        document.getElementById("flame");
 
-    if (correct) {
+    const cloud =
+        document.getElementById("gasCloud");
 
-        feedback.textContent = "✅ Correct! Lemon juice is acidic.";
-        feedback.style.color = "#15803d";
 
-        score++;
-        document.getElementById("score").textContent = score;
+    cloud.classList.add("active");
 
-    } else {
 
-        feedback.textContent =
-            "❌ Incorrect. Lemon juice is acidic.";
-        feedback.style.color = "#b91c1c";
+    if (selectedGas === "oxygen") {
+
+        flame.classList.remove("small");
+        flame.classList.remove("out");
+
+        flame.classList.add("strong");
+
+        document
+            .getElementById("effect")
+            .textContent =
+            "Oxygen supports combustion.";
+
+        document
+            .getElementById("flameCondition")
+            .textContent =
+            "Flame becomes stronger";
+
+        document
+            .getElementById("observation")
+            .innerHTML =
+            "<strong>Observation:</strong> The flame becomes stronger because oxygen supports combustion.";
 
     }
+
+
+    else if (selectedGas === "carbonDioxide") {
+
+        flame.classList.remove("small");
+        flame.classList.remove("strong");
+
+        flame.classList.add("out");
+
+        document
+            .getElementById("effect")
+            .textContent =
+            "Carbon dioxide does not support combustion.";
+
+        document
+            .getElementById("flameCondition")
+            .textContent =
+            "Flame goes out";
+
+        document
+            .getElementById("observation")
+            .innerHTML =
+            "<strong>Observation:</strong> The flame goes out because carbon dioxide does not support combustion.";
+
+    }
+
+
+    else if (selectedGas === "nitrogen") {
+
+        flame.classList.remove("strong");
+        flame.classList.remove("out");
+
+        flame.classList.add("small");
+
+        document
+            .getElementById("effect")
+            .textContent =
+            "Nitrogen does not support combustion.";
+
+        document
+            .getElementById("flameCondition")
+            .textContent =
+            "Flame becomes weaker";
+
+        document
+            .getElementById("observation")
+            .innerHTML =
+            "<strong>Observation:</strong> The flame becomes weaker because nitrogen does not support combustion.";
+
+    }
+
 }
 
 
-function checkAnswer2(button, correct) {
+function checkQuestion(questionNumber, correct) {
 
-    if (answered2) {
+    if (answered[questionNumber]) {
         return;
     }
 
-    answered2 = true;
+    answered[questionNumber] = true;
 
-    const feedback = document.getElementById("feedback2");
+
+    const feedback =
+        document.getElementById(
+            "feedback" + questionNumber
+        );
+
 
     if (correct) {
 
-        feedback.textContent =
-            "✅ Correct! pH 7 is neutral.";
-        feedback.style.color = "#15803d";
-
         score++;
-        document.getElementById("score").textContent = score;
 
-    } else {
+        document
+            .getElementById("score")
+            .textContent = score;
 
         feedback.textContent =
-            "❌ Incorrect. pH 7 is neutral.";
-        feedback.style.color = "#b91c1c";
+            "✅ Correct!";
+
+        feedback.style.color =
+            "#15803d";
 
     }
+
+    else {
+
+        feedback.textContent =
+            "❌ Incorrect. Try again after reviewing the experiment.";
+
+        feedback.style.color =
+            "#b91c1c";
+
+    }
+
 }
 
 
-function checkAnswer3(button, correct) {
+function resetExperiment() {
 
-    if (answered3) {
-        return;
-    }
+    selectedGas = null;
 
-    answered3 = true;
+    document
+        .querySelectorAll(".gas-button")
+        .forEach(function(button) {
 
-    const feedback = document.getElementById("feedback3");
+            button.classList.remove("selected");
 
-    if (correct) {
-
-        feedback.textContent =
-            "✅ Correct! A pH greater than 7 is basic.";
-        feedback.style.color = "#15803d";
-
-        score++;
-        document.getElementById("score").textContent = score;
-
-    } else {
-
-        feedback.textContent =
-            "❌ Incorrect. A pH greater than 7 is basic.";
-        feedback.style.color = "#b91c1c";
-
-    }
-}
+        });
 
 
-function resetLab() {
+    document
+        .getElementById("selectedGas")
+        .textContent =
+        "None";
 
-    score = 0;
 
-    answered1 = false;
-    answered2 = false;
-    answered3 = false;
+    document
+        .getElementById("effect")
+        .textContent =
+        "Choose a gas to begin.";
 
-    document.getElementById("score").textContent = "0";
 
-    document.getElementById("substance").textContent =
-        "Choose a substance";
+    document
+        .getElementById("flameCondition")
+        .textContent =
+        "Burning normally";
 
-    document.getElementById("ph").textContent = "-";
 
-    document.getElementById("type").textContent = "-";
+    document
+        .getElementById("observation")
+        .innerHTML =
+        "<strong>Observation:</strong> Select a gas and add it to the chamber.";
 
-    document.getElementById("observation").textContent =
-        "Select a substance to begin the experiment.";
 
-    document.getElementById("feedback1").textContent = "";
-    document.getElementById("feedback2").textContent = "";
-    document.getElementById("feedback3").textContent = "";
+    const flame =
+        document.getElementById("flame");
 
-    document.getElementById("liquid").style.backgroundColor =
-        "#89c2ff";
 
-    document.getElementById("liquid").style.height =
-        "55%";
+    flame.classList.remove("small");
+    flame.classList.remove("strong");
+    flame.classList.remove("out");
+
+
+    document
+        .getElementById("gasCloud")
+        .classList.remove("active");
+
 }
 
 </script>
